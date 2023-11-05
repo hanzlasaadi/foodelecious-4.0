@@ -29194,7 +29194,7 @@ body .note-modal-backdrop {
   padding: 1rem;
   white-space: nowrap;
   text-align: center;
-  color: rgba(255, 255, 255, 0.25);
+  color: #e57c35;
   border: none;
   font-size: 0.65625rem;
   text-transform: uppercase;
@@ -29230,6 +29230,7 @@ body .note-modal-backdrop {
 
 .pos .pos-menu .nav.nav-tabs .nav-item .nav-link.active {
   color: #fff;
+  background-color: #e57c35;
 }
 
 .pos .pos-menu .nav.nav-tabs .nav-item .nav-link.active .card .card-arrow,

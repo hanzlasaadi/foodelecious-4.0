@@ -1,0 +1,10 @@
+
+const comodityData = {
+
+    workerId: "654111bab8f20fc4157388f0",
+    paymentType: "Cash",
+    totalPrice: 5.8,
+    clientPay: 10,
+    status: "pending",
+    commodityList: []
+  };

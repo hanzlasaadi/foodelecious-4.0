@@ -8,7 +8,7 @@ const addListItemNav = function (name, id) {
   return `<li class="nav-item category-nav-item" data-category='${id}'>
   <a class="nav-link" href="#" data-filter="all">
     <div class="card" style=" border-radius:10px; border-color:#e57c35 "  >
-      <div class="card-body" style="color: grey ;">${name}</div>
+      <div class="card-body" ">${name}</div>
     </div>
   </a>
   </li>`;
@@ -159,9 +159,8 @@ posModal.addEventListener("show.bs.modal", async (e) => {
 
 function modalOptionsHtml(stepToChoose) {
   return `<div id="stepToChoose" class="mb-2">
-  <div id="stepName" class="fw-bold" style="color: black">${
-    stepToChoose.stepName
-  }</div>
+  <div id="stepName" class="fw-bold" style="color: black">${stepToChoose.stepName
+    }</div>
   <div class="option-list">
     ${stepToChoose.options.map((op) => {
       return `<div class="option">
@@ -172,10 +171,10 @@ function modalOptionsHtml(stepToChoose) {
         class="option-input"
       />
       <label class="option-label" for="${op._id}">
-        <span class="option-text" style="color: black"
+        <span class="option-text" style="color: grey; font-size:larger;"
           >${op.type}</span
         >
-        <span class="option-price" style="color: darkgrey"
+        <span class="option-price" style="color: red; font-size:10px;"
           >+${op.price}£</span
         >
       </label>
