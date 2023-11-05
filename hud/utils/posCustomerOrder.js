@@ -4,6 +4,11 @@ const productCardsContainer = document.querySelector("#productCardsContainer");
 const posModal = document.getElementById("modalPosItem");
 let currentProductCategory;
 let steps = [];
+let commodityOptions = [];
+let grandTotal = 0;
+let currentProduct;
+let commodityList = [];
+let globalPaymentType = "Cash";
 
 const addListItemNav = function (name, id) {
   return `<li class="nav-item category-nav-item" data-category='${id}'>
@@ -131,6 +136,8 @@ const findClickedProduct = async (subCategoryId, productId) => {
 // };
 
 posModal.addEventListener("show.bs.modal", async (e) => {
+  currentProduct = {};
+  commodityOptions = [];
   e.target.querySelector("#modal-steps").innerHTML = "";
   steps = [];
   console.log(e.relatedTarget.dataset.productid);
@@ -162,22 +169,44 @@ posModal.addEventListener("show.bs.modal", async (e) => {
     console.log("Hanzla");
     let arr = [];
     document.querySelectorAll("#stepToChoose").forEach((el) => {
-      console.log(el.querySelector("#stepName").textContent);
-      arr.push(
-        Array.from(el.querySelectorAll(".option-input")).filter(
-          (el) => el.checked
-        )
-      );
+      el.querySelectorAll("#optionInput");
+      // console.log(el.querySelector("#stepName").textContent);
+      // arr.push(
+      //   Array.from(el.querySelectorAll(".option-input")).filter(
+      //     (el) => el.checked
+      //   )
+      // );
     });
     arr = arr.filter((el) => el.length !== 0);
     steps = arr.map((el) => {
       return { _id: el[0].id };
     });
-    console.log(steps);
-    console.log(currentProductCategory);
-    console.log(currentProductsList);
+
+    document.querySelectorAll("#optionInput").forEach((el) => {
+      el.addEventListener("click", () => {
+        if (el.querySelector(".option-input").checked) {
+          console.log(el.querySelector(".option-input").dataset.price);
+        }
+      });
+    });
+
+    // add to card
+    cartCard(e.relatedTarget.dataset.productid);
+  });
+
+  document.querySelectorAll(".option-input").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      const obj = {
+        name: e.currentTarget.dataset.name,
+        price: e.currentTarget.dataset.price,
+        type: e.currentTarget.dataset.type,
+      };
+      commodityOptions.push(obj);
+    });
   });
 });
+
+posModal.addEventListener("hide.bs.modal", (e) => {});
 
 function modalOptionsHtml(stepToChoose) {
   return `<div id="stepToChoose" class="mb-2">
@@ -187,11 +216,14 @@ function modalOptionsHtml(stepToChoose) {
   <div class="option-list">
     ${stepToChoose.options
       .map((op) => {
-        return `<div class="option">
+        return `<div class="option" id="optionInput">
       <input
         type="checkbox"
         id="${op._id}"
         name="${stepToChoose.stepName}"
+        data-price="${op.price}"
+        data-type="${op.type}"
+        data-name="${stepToChoose.stepName}"
         class="option-input"
       />
       <label class="option-label" for="${op._id}">
@@ -211,31 +243,47 @@ function modalOptionsHtml(stepToChoose) {
 }
 
 // Update the cartCard function to accept selectedOptions
-const cartCard = function (product, selectedOptions) {
-  const selectedOptionsHtml = selectedOptions
-    .map((option) => {
-      return `<div class="selected-option">
-      <span class="option-name">${option.stepName}: ${option.option.type}</span>
-      <span class="option-price">+${option.option.price}£</span>
-    </div>`;
-    })
-    .join("");
+const cartCard = function (productId) {
+  const productPrice = commodityOptions.map((el) => +el.price);
+  const totalPrice = productPrice.reduce((prev, curr) => prev + curr, 0);
+  grandTotal += totalPrice;
+  const [currProduct] = currentProductsList.productsList.filter((val) => {
+    return val._id === productId;
+  });
+  currentProduct = currProduct;
 
-  return `<div class="pos-order">
+  document.querySelector("#newOrderTab").insertAdjacentHTML(
+    "beforeend",
+    `<div class="pos-order">
     <div class="pos-order-product">
-      <div class="img" style="background-image: url(../assets/img/pos/${product.image});"></div>
+      <div class="img" style="background-image: url(../assets/img/pos/${currProduct.image});"></div>
       <div class="flex-1">
-        <div class="h6 mb-1" style="color: grey">${product.name}</div>
-        <div class="small" style="color: lightgrey">$${product.price}</div>
-        <div class="small mb-2" style="color: lightgrey">- size: ${product.stepName[0].type}</div>
-        <div class="d-flex">
-          <a href="#" class="btn btn-outline-theme btn-sm"><i class="fa fa-minus"></i></a>
-          <input type="text" class="form-control w-50px form-control-sm mx-2 bg-white bg-opacity-25 bg-white bg-opacity-25 text-center" value="01" />
-          <a href="#" class="btn btn-outline-theme btn-sm"><i class="fa fa-plus"></i></a>
-        </div>
+        <div class="h6 mb-1" style="color: grey">${currProduct.name}</div>
       </div>
     </div>
-    <div class="pos-order-price">$${product.price}</div>
-    <div class="selected-options">${selectedOptionsHtml}</div>
-  </div>`;
+    <div class="pos-order-price">$${totalPrice}</div>
+  </div>`
+  );
+
+  commodityObj = {
+    barcode: "123hanzla",
+    name: currProduct.name,
+    subCategory: currentProductCategory._id,
+    productPrice: totalPrice,
+    options: commodityOptions,
+  };
+  commodityList.push(commodityObj);
 };
+
+// submit order
+document.querySelector("#submitOrder").addEventListener("click", (e) => {
+  e.preventDefault();
+  console.log(grandTotal);
+  const orderObj = {
+    workerId: "654111bab8f20fc4157388f0",
+    paymentType: globalPaymentType,
+    totalPrice: grandTotal,
+    status: "pending",
+    commodityList,
+  };
+});
