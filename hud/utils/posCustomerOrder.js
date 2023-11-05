@@ -3,6 +3,7 @@ const menuNavList = document.querySelector("#menuNav");
 const productCardsContainer = document.querySelector("#productCardsContainer");
 const posModal = document.getElementById("modalPosItem");
 let currentProductCategory;
+let steps = [];
 
 const addListItemNav = function (name, id) {
   return `<li class="nav-item category-nav-item" data-category='${id}'>
@@ -131,6 +132,7 @@ const findClickedProduct = async (subCategoryId, productId) => {
 
 posModal.addEventListener("show.bs.modal", async (e) => {
   e.target.querySelector("#modal-steps").innerHTML = "";
+  steps = [];
   console.log(e.relatedTarget.dataset.productid);
   const subcategory = await findSubCategory(currentSubCategoryId);
   const [clickedProduct] = await findClickedProduct(
@@ -155,6 +157,26 @@ posModal.addEventListener("show.bs.modal", async (e) => {
   // console.log(modalOptionsHtml(subcategory.stepsToChoose[0]));
 
   // add to cart functionality
+  e.target.querySelector("#addToCart").addEventListener("click", (event) => {
+    event.preventDefault();
+    console.log("Hanzla");
+    let arr = [];
+    document.querySelectorAll("#stepToChoose").forEach((el) => {
+      console.log(el.querySelector("#stepName").textContent);
+      arr.push(
+        Array.from(el.querySelectorAll(".option-input")).filter(
+          (el) => el.checked
+        )
+      );
+    });
+    arr = arr.filter((el) => el.length !== 0);
+    steps = arr.map((el) => {
+      return { _id: el[0].id };
+    });
+    console.log(steps);
+    console.log(currentProductCategory);
+    console.log(currentProductsList);
+  });
 });
 
 function modalOptionsHtml(stepToChoose) {
@@ -163,8 +185,9 @@ function modalOptionsHtml(stepToChoose) {
     stepToChoose.stepName
   }</div>
   <div class="option-list">
-    ${stepToChoose.options.map((op) => {
-      return `<div class="option">
+    ${stepToChoose.options
+      .map((op) => {
+        return `<div class="option">
       <input
         type="checkbox"
         id="${op._id}"
@@ -180,7 +203,39 @@ function modalOptionsHtml(stepToChoose) {
         >
       </label>
     </div>`;
-    })}
+      })
+      .toString()
+      .replaceAll(",", "")}
   </div>
 </div>`;
 }
+
+// Update the cartCard function to accept selectedOptions
+const cartCard = function (product, selectedOptions) {
+  const selectedOptionsHtml = selectedOptions
+    .map((option) => {
+      return `<div class="selected-option">
+      <span class="option-name">${option.stepName}: ${option.option.type}</span>
+      <span class="option-price">+${option.option.price}£</span>
+    </div>`;
+    })
+    .join("");
+
+  return `<div class="pos-order">
+    <div class="pos-order-product">
+      <div class="img" style="background-image: url(../assets/img/pos/${product.image});"></div>
+      <div class="flex-1">
+        <div class="h6 mb-1" style="color: grey">${product.name}</div>
+        <div class="small" style="color: lightgrey">$${product.price}</div>
+        <div class="small mb-2" style="color: lightgrey">- size: ${product.stepName[0].type}</div>
+        <div class="d-flex">
+          <a href="#" class="btn btn-outline-theme btn-sm"><i class="fa fa-minus"></i></a>
+          <input type="text" class="form-control w-50px form-control-sm mx-2 bg-white bg-opacity-25 bg-white bg-opacity-25 text-center" value="01" />
+          <a href="#" class="btn btn-outline-theme btn-sm"><i class="fa fa-plus"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="pos-order-price">$${product.price}</div>
+    <div class="selected-options">${selectedOptionsHtml}</div>
+  </div>`;
+};
